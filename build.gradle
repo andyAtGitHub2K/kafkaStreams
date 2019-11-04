@@ -1,0 +1,62 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0'
+    }
+}
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+group 'SampleKafkaStream'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'org.apache.kafka', name: 'kafka_2.11', version: '2.3.0'
+    compile group: 'org.apache.kafka', name: 'kafka-clients', version: '2.3.0'
+    compile group: 'org.apache.kafka', name: 'kafka-streams', version: '2.3.0'
+    compile group: 'com.google.code.gson', name: 'gson', version: '2.8.5'
+    compile (group: 'com.github.javafaker', name: 'javafaker', version: '0.12') {
+        exclude group:'ch.qos.logback'
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.28'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version:'5.0.0'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.0.0'
+    testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.28'
+
+}
+
+task runChap2Producer(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "ahbun.chapter2.producer.SimpleProducer"
+}
+//     ahbun/chapter2/ahbun/chapter/consumer/ThreadedConsumer.java
+task runChap2Consumer(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "ahbun.chapter2.ahbun.chapter.consumer.ThreadedConsumer"
+}
+
+// /home/babee/Project/samplekafka/src/main/java/ahbun/chap3/SimpleAllCapApp.java
+task runChap3SmallAllCapApp(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "ahbun.chap3.SimpleAllCapApp"
+}
+
+task runChap3Zmart(type: JavaExec) {
+    classpath sourceSets.main.runtimeClasspath
+    main = "ahbun.chap3.zeemart.ZMartKSApp"
+}
