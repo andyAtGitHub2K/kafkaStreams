@@ -68,13 +68,12 @@ public class TrackTop5HighVolume {
         // 2. create topology
         KafkaStreams kafkaStreams = new KafkaStreams(getTopology(appProperties), streamPproperties);
         // 3. start data generator
-        MockDataProducer.produceStockTransaction(4,
+        MockDataProducer.produceStockTransaction(4, 5,
                 "share-volume-stream", 4,
                 200, null);
         // 4. start kafka pipeline
         kafkaStreams.start();
         Thread.sleep(12000);
-        //kafkaStreams.close(Duration.of(30, SECONDS));
         kafkaStreams.close();
         logger.info(">>>> pipeline closed");
         MockDataProducer.shutdown();

@@ -158,7 +158,7 @@ public class DataGeneratorTest {
     @Test
     public void testCreateStockTx() {
         String[] industries = new String[]{"a", "b", "c"};
-        List<StockTransaction> txList = DataGenerator.makeStockTx(5, industries);
+        List<StockTransaction> txList = DataGenerator.makeStockTx(5, 3, industries);
 
         txList.stream().forEach(s -> System.out.println(s.toString()));
     }

@@ -1,12 +1,15 @@
 package ahbun.lib;
 
 import ahbun.model.*;
+import ahbun.util.Tuple;
+import com.google.gson.reflect.TypeToken;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
 
-
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 public class StreamsSerdes {
@@ -85,6 +88,38 @@ public class StreamsSerdes {
         public TxSummarySerde() {
             super(new JsonSerializer<>(),
                     new JsonDeserializer<>(TransactionSummary.class));
+        }
+    }
+
+    public static Serde<StockPerformance> StockPerfSerde() {
+        return new StockPerfSerde();
+    }
+
+    public static class StockPerfSerde extends WrapperSerdes<StockPerformance> {
+
+        public StockPerfSerde() {
+           super(new JsonSerializer<>(), new JsonDeserializer<>(StockPerformance.class));
+        }
+    }
+
+    public static Serde<ClickEvent> ClickEventSerde() {
+        return new ClickEventSerde();
+    }
+
+    public static class ClickEventSerde extends WrapperSerdes<ClickEvent> {
+        public ClickEventSerde() {
+            super(new JsonSerializer<>(), new JsonDeserializer<>(ClickEvent.class));
+        }
+    }
+
+    public static Serde<Tuple<List<ClickEvent>, List<StockTransaction>>> CTSerceTupleSerde() {
+        return  new CTSerceTuple();
+    }
+
+    public static class CTSerceTuple  extends WrapperSerdes<Tuple<List<ClickEvent>, List<StockTransaction>>> {
+        private static final Type type = new TypeToken<Tuple<List<ClickEvent>, List<StockTransaction>>>(){}.getType();
+        public CTSerceTuple() {
+            super(new JsonSerializer<>(),  new JsonDeserializer<>(type));
         }
     }
 

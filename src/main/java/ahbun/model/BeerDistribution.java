@@ -15,7 +15,15 @@ public class BeerDistribution {
     private String beerType;
 
     public static BeerDistributionBuilder builder() { return new BeerDistributionBuilder(); }
-
+    public static BeerDistributionBuilder builder(BeerDistribution beerDistribution) {
+        BeerDistributionBuilder beerDistributionBuilder = builder();
+        beerDistributionBuilder
+                .numberOfCases(beerDistribution.numberOfCases)
+                .totalSales(beerDistribution.totalSales)
+                .currency(beerDistribution.currency)
+                .beerType(beerDistribution.beerType);
+        return  beerDistributionBuilder;
+    }
     private BeerDistribution(BeerDistributionBuilder builder) {
         this.currency = builder.getCurrency();
         this.beerType = builder.getBeerType();

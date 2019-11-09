@@ -1,11 +1,9 @@
 package ahbun.util;
 
-import ahbun.model.BeerDistribution;
+import ahbun.model.*;
 import ahbun.model.Currency;
-import ahbun.model.StockTickerData;
-import ahbun.model.StockTransaction;
+import com.github.javafaker.DateAndTime;
 import com.github.javafaker.Faker;
-import ahbun.model.Purchase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +13,13 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class DataGenerator {
@@ -31,6 +34,8 @@ public class DataGenerator {
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
     private static Supplier<Date> timestampGenerator = () -> faker.date().past(45, TimeUnit.MINUTES, new Date());
     private static Logger logger = LoggerFactory.getLogger(DataGenerator.class);
+    private static Function<String, String> symbolSupplier = (industry) -> industry + "_" + faker.number().numberBetween(1,5);
+
     /***
      * {"firstName":"hi-b","lastName-b":"lala-b",
      * "customerId":"cid-002",
@@ -207,15 +212,14 @@ public class DataGenerator {
         return stockTickerDataList;
     }
 
-    public static List<StockTransaction> makeStockTx(int iteration, String[] industryList) {
+    public static List<StockTransaction> makeStockTx(int iteration, int customerSize, String[] industryList) {
         List<StockTransaction> txList = new ArrayList<>();
         StockTransaction.STransactionBuilder builder = StockTransaction.builder();
-        //String[] industrylist = {"food", "tooy", "book", "sales", "school", "media"};
         String industry;
-
+        List<String> customerIDList = makeCustomerID(customerSize);
         for (int i = 0; i < iteration; i++) {
             industry = industryList[faker.number().numberBetween(0, industryList.length -1)];
-            txList.add(builder.customerId(faker.idNumber().valid())
+            txList.add(builder.customerId(customerIDList.get(faker.number().numberBetween(0, customerSize - 1)))
                     .industry(industry)
                     .transactionTimestamp(LocalDateTime.now())
                     .sector(faker.company().name())
@@ -226,6 +230,15 @@ public class DataGenerator {
         }
         return txList;
     }
+
+    public static List<String> makeCustomerID(int size) {
+        List<String> customerID = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            customerID.add("cid-" + i);
+        }
+        return customerID;
+    }
+
 
     public static List<StockTransaction> makeStockTxInTradingWindow(
             int txCount,
@@ -340,6 +353,25 @@ public class DataGenerator {
         }
 
         return beerDistributions;
+    }
+
+    public static List<ClickEvent> makeClickEvents(int max, List<String> industrylList) {
+        List<ClickEvent> clickEvents = new ArrayList<>();
+        List<String> symbolList = new ArrayList<>();
+        for (String industry: industrylList) {
+            symbolList.add(symbolSupplier.apply(industry));
+        }
+        Instant passed5min = Instant.now().minus(5, ChronoUnit.MINUTES);
+        for (int i = 0; i< max; i++) {
+            String symbol = symbolList.get(faker.number().numberBetween(0, symbolList.size() - 1));
+            ClickEvent event = new ClickEvent(
+                    symbol,
+                            faker.date().between(Date.from(passed5min),
+                                    Date.from(passed5min.plus(3, ChronoUnit.MINUTES))).toInstant(),
+                    "http://" + symbol + "-" + faker.company().url());
+            clickEvents.add(event);
+        }
+        return clickEvents;
     }
 
     private static Currency getCurrency(int i) {

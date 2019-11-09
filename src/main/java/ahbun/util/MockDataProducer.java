@@ -1,8 +1,6 @@
 package ahbun.util;
 
-import ahbun.model.Purchase;
-import ahbun.model.StockTickerData;
-import ahbun.model.StockTransaction;
+import ahbun.model.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -18,13 +16,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
-import static ahbun.util.DataGenerator.makeFinancialNews;
-import static ahbun.util.DataGenerator.makeStockTx;
+import static ahbun.util.DataGenerator.*;
 
 /***
  * MockDataProducer generate kafka messages orginated from a data generator
@@ -37,7 +36,7 @@ public class MockDataProducer {
     private static ExecutorService executorService = Executors.newFixedThreadPool(1);
     private static Callback callback;
     private static boolean runForever = true;
-
+    private static final String[] INSUSTRY_LIST = {"food", "tooy"};//"book", "sales", "school", "media"};
 
     /***
      * producePurchaseData initializes a kafka producer to send message.
@@ -122,15 +121,15 @@ public class MockDataProducer {
     }
 
     public static void produceStockTransaction(int iterations,
+                                               int customerSize,
                                                String sourceTopic,
                                                int batchSize,
                                                long batchIntervalMills,
                                                String financialNewsTopic
                                                ) throws IOException {
-        String[] industryList = {"food", "tooy", "book", "sales", "school", "media"};
         if (financialNewsTopic != null) {
-            makeFinancialNews(industryList.length);
-            produceFinancialNews(financialNewsTopic, industryList);
+            makeFinancialNews(INSUSTRY_LIST.length);
+            produceFinancialNews(financialNewsTopic, INSUSTRY_LIST);
         }
 
         Runnable runnable = () -> {
@@ -138,9 +137,10 @@ public class MockDataProducer {
                 init();
                 List<StockTransaction> txList;
                 for (int i = 0; i < iterations; i++) {
-                    txList = DataGenerator.makeStockTx(batchSize, industryList);
+                    txList = DataGenerator.makeStockTx(batchSize, customerSize, INSUSTRY_LIST);
                     for (StockTransaction tx : txList) {
                         String json = convertToJson(tx);
+                        logger.debug(json);
                         ProducerRecord<String, String> record =
                                 new ProducerRecord<>(sourceTopic, tx.getSymbol(), json);
                         producer.send(record, callback);
@@ -150,10 +150,46 @@ public class MockDataProducer {
                 }
             } catch (IOException | InterruptedException ex) {
                 logger.error(ex.getMessage());
+                return;
             }
         };
 
         executorService.submit(runnable);
+    }
+
+    public static void produceTxAndClickEvents(int iteration, int max, int customerSize, String clickEventTopic, String txTopic) {
+        Runnable job = () -> {
+            try {
+                init();
+                for (int j = 0; j < iteration; j++) {
+                    List<ClickEvent> clickEvents = DataGenerator.makeClickEvents(max, Arrays.asList(INSUSTRY_LIST));
+                    for (ClickEvent event : clickEvents) {
+                        String json = convertToJson(event);
+                        logger.info("click event: " + json);
+                        ProducerRecord<String, String> record = new ProducerRecord<>(clickEventTopic, event.getSymbol(), json);
+                        producer.send(record, callback);
+                    }
+
+                    List<StockTransaction> txList;
+                    txList = DataGenerator.makeStockTx(max, customerSize, INSUSTRY_LIST);
+
+                    for (StockTransaction tx : txList) {
+                        String json = convertToJson(tx);
+                        logger.info("tx: " + json);
+                        ProducerRecord<String, String> record =
+                                new ProducerRecord<>(txTopic, tx.getSymbol(), json);
+                        producer.send(record, callback);
+                    }
+                    logger.info("done batch: " + j);
+                    Thread.sleep(2000);
+                }
+            } catch (IOException|InterruptedException ex) {
+                logger.error(ex.getMessage());
+                return;
+            }
+        };
+
+        executorService.submit(job);
     }
 
     public static void produceTxWithinWindows(String sourceTopic, int iteration, int customerCount,
@@ -202,22 +238,46 @@ public class MockDataProducer {
         }
     }
 
+    public static void produceBeerDistributionMessages(String sourceTopic, int size) {
+        Runnable producerBeerSales = () -> {
+            try {
+                init();
+            } catch (IOException ex) {
+                System.out.println(ex);
+                return;
+            }
+            List<BeerDistribution> beerDistributions = makeBeerDistribution(size);
+            List<String> beerDistInJsonList = convertToJson(beerDistributions);
+            for (String distribution : beerDistInJsonList) {
+                ProducerRecord<String, String> record =
+                        new ProducerRecord<>(sourceTopic, null, distribution);
+                logger.info("sending: " + distribution);
+                producer.send(record, callback);
+            }
+        };
+
+        executorService.submit(producerBeerSales);
+    }
+
     /***
      * initialize Kafka producer and callback
      * @throws IOException
      */
     private static void init() throws IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classLoader.getResourceAsStream("chapter5/kafka_producer_stock.properties");
-        Properties properties = new Properties();
-        properties.load(is);
-        producer = new KafkaProducer<String, String>(properties);
+        System.out.println("iMock data privuder init Called");
+        //if (producer != null) {
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            InputStream is = classLoader.getResourceAsStream("chapter5/kafka_producer_stock.properties");
+            Properties properties = new Properties();
+            properties.load(is);
+            producer = new KafkaProducer<String, String>(properties);
 
-        callback = (metadata, exception) -> {
-            if (exception != null) {
-                exception.printStackTrace();
-            }
-        };
+            callback = (metadata, exception) -> {
+                if (exception != null) {
+                    exception.printStackTrace();
+                }
+            };
+       // }
     }
 
     public static void shutdown() {
