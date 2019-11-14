@@ -14,15 +14,17 @@ import ahbun.lib.ObjectConverter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class CogroupProcessorTest {
     private Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-    String expectedJson;
-    Instant testTime;
-    String expectedToString;
+    private String expectedJson;
+    private Instant testTime;
+    private String expectedToString;
+
     @Before
     public void setup() {
         expectedJson = "{\"x\":[{\"symbol\":\"abc\",\"clickInstance\":{\"seconds\":1573266245,\"nanos\":0},\"pageLink\":\"cde\"},{\"symbol\":\"abc\",\"clickInstance\":{\"seconds\":1573266250,\"nanos\":0},\"pageLink\":\"hij\"}],\"y\":[]}";
@@ -45,7 +47,7 @@ public class CogroupProcessorTest {
 
         Type tupleType = new TypeToken<Tuple<List<ClickEvent>, List<StockTransaction>>>(){}.getType();
         Tuple<List<ClickEvent>, List<StockTransaction>> t2 = gson.fromJson(t, tupleType);
-        Assert.assertTrue(expectedToString.equals(t2));
+        Assert.assertTrue(tuple.equals(t2));
         Assert.assertEquals(expectedJson, t);
     }
 }

@@ -59,10 +59,6 @@ public class PurchasePattern {
         this.item = builder.item;
         this.zipCode = builder.zipCode;
     }
-    private static Date convertStrToDate(final String dateInStr) throws ParseException {
-        SimpleDateFormat d = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX");
-        return d.parse(dateInStr);
-    }
 
     @Override
     public String toString() {

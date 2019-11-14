@@ -157,7 +157,6 @@ public class ZMartKSAppJoin {
         KStream<String, Purchase>[] streams = ksMasked
                 .selectKey((k,v) -> v.getCustomerId())
                 .branch(beerPredicate, bookPredicate);
-        //STREAM_BRANCH.BEER.ordinal() properties.getProperty("beer_sink")
 
         KStream<String, Purchase> beerStream = streams[STREAM_BRANCH.BEER.ordinal()];
         KStream<String, Purchase> bookStream = streams[STREAM_BRANCH.BOOK.ordinal()];

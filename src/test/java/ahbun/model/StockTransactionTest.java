@@ -6,8 +6,6 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.*;
-
 public class StockTransactionTest {
     private StockTransaction.STransactionBuilder builder;
     private StockTransaction transaction;

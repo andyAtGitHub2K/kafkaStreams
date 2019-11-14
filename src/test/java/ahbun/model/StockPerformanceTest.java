@@ -21,8 +21,6 @@ public class StockPerformanceTest {
     public void update() {
         for (int i = 0; i < volume.length; i++ ) {
             stockPerformance.update(price[i], volume[i]);
-            //System.out.printf(stockPerformance.toString());
-            //System.out.println();
             Assert.assertTrue(Math.abs(expectedAvgPrice[i] - stockPerformance.getCurrentAvgPrice()) < 0.0001);
             Assert.assertTrue(Math.abs(expectedAvgPrice[i]* 10 - stockPerformance.getCurrentAvgVolume()) < 0.0001);
             Assert.assertTrue(Math.abs(expectedChangePCT[i] - stockPerformance.getPriceChangePCT()) < 0.001);

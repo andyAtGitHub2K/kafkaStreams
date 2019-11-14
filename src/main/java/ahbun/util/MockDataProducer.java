@@ -1,27 +1,20 @@
 package ahbun.util;
 
+import ahbun.Chapter7.interceptors.StockTxProducerInterceptor;
 import ahbun.model.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.protocol.types.Field;
+import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.streams.StreamsConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.kafka.clients.producer.Callback;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
 
 import static ahbun.util.DataGenerator.*;
 
@@ -36,7 +29,8 @@ public class MockDataProducer {
     private static ExecutorService executorService = Executors.newFixedThreadPool(1);
     private static Callback callback;
     private static boolean runForever = true;
-    private static final String[] INSUSTRY_LIST = {"food", "tooy"};//"book", "sales", "school", "media"};
+    private static final String[] INSUSTRY_LIST = {"food", "book", "sales", "school", "media"};
+    private static boolean useInterceptor = true;
 
     /***
      * producePurchaseData initializes a kafka producer to send message.
@@ -264,20 +258,24 @@ public class MockDataProducer {
      * @throws IOException
      */
     private static void init() throws IOException {
-        System.out.println("iMock data privuder init Called");
-        //if (producer != null) {
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            InputStream is = classLoader.getResourceAsStream("chapter5/kafka_producer_stock.properties");
-            Properties properties = new Properties();
-            properties.load(is);
-            producer = new KafkaProducer<String, String>(properties);
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream is;
+        if (useInterceptor) {
+            logger.info("Producer interceptor enabled.");
+            is = classLoader.getResourceAsStream("chapter7/kafka_producer_stock.properties");
+        } else {
+            is = classLoader.getResourceAsStream("chapter5/kafka_producer_stock.properties");
+        }
+        Properties properties = new Properties();
+        properties.load(is);
 
-            callback = (metadata, exception) -> {
-                if (exception != null) {
-                    exception.printStackTrace();
-                }
-            };
-       // }
+        producer = new KafkaProducer<>(properties);
+
+        callback = (metadata, exception) -> {
+            if (exception != null) {
+                exception.printStackTrace();
+            }
+        };
     }
 
     public static void shutdown() {
@@ -310,5 +308,4 @@ public class MockDataProducer {
     private static <T> String convertToJson(T object) {
         return gson.toJson(object);
     }
-
 }

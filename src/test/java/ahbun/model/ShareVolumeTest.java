@@ -96,7 +96,7 @@ public class ShareVolumeTest {
             treeSet.add(a);
         }
 
-        Assert.assertTrue(3  == treeSet.currentSize());
+        Assert.assertTrue(5  == treeSet.currentSize());
         System.out.println(treeSet.toString());
         Assert.assertTrue("X, R, K".equals(treeSet.toString()));
     }

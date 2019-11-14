@@ -82,7 +82,7 @@ public class RewardAccumulator {
         private int daysFromLastPurchase;
 
         private RewardBuilder(Purchase purchase) {
-            this.custumerID = purchase.getFirstName() + "," + purchase.getLastName();
+            this.custumerID = purchase.getLastName() + "," + purchase.getFirstName() ;
             this.purchaseTotal = (double)purchase.getQuantity() * purchase.getPrice();
             this.rewardPoints = (int)purchaseTotal;
         }

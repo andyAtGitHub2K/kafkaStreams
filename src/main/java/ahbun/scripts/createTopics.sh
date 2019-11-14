@@ -11,12 +11,6 @@ declare -a arr=("chapter4-zmrt-in-topic"
                 "chapter4-reward"
                 )
 
-# start zookeeper
-# ./bin/zookeeper-server-start.sh ./config/zookeeper.properties
-# start kafka
-# ./bin/kafka-server-start.sh ./config/server.properties
-
-
 # create topics
 for item in "${arr[@]}"
 do

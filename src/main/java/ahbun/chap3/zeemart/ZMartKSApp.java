@@ -105,10 +105,10 @@ public class ZMartKSApp {
                 purchase.getDepartment().equalsIgnoreCase("electronics");
 
         KStream<String, Purchase>[] streams = ksMasked.branch(cafePredicate, electronicsPredicate);
-        streams[STREAM_BRANCH.CAFE.ordinal()].to(properties.getProperty("cafe_out"),
+        streams[STREAM_BRANCH.CAFE.ordinal()].to(properties.getProperty("cafe_sink"),
                 Produced.with(stringSerde, purchaseSerde));
 
-        streams[STREAM_BRANCH.ELECTRONICS.ordinal()].to(properties.getProperty("electronics_out"),
+        streams[STREAM_BRANCH.ELECTRONICS.ordinal()].to(properties.getProperty("electronics_sink"),
                 Produced.with(stringSerde, purchaseSerde));
 
         //
