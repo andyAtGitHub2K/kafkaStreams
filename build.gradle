@@ -40,8 +40,7 @@ dependencies {
     testCompile group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.3.0'
     testCompile group: 'org.apache.kafka', name: 'kafka-clients', version: '2.3.0', classifier: 'test'
     testCompile group: 'org.apache.kafka', name: 'kafka-streams', version: '2.3.0', classifier: 'test'
-    testCompile group:'org.mockito', name:'mockito-core', version:'2.10.0'
-
+    testCompile group:'org.mockito', name:'mockito-core', version:'3.1.0'
     testCompile group:'org.hamcrest', name:'hamcrest-junit', version:'2.0.0.0'
 }
 

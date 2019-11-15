@@ -38,27 +38,25 @@ public class CogroupingPunctuator implements Punctuator {
             count++;
         }
         iteratorDebug.close();
-        logger.info("KV store size: " + count);
+        logger.debug("KV store size: " + count);
        KeyValueIterator<String, Tuple<List<ClickEvent>, List<StockTransaction>>> iterator =  kvKeyValueStore.all();
 
-       logger.info("Punctuator executed");
+       logger.debug("Punctuator executed");
        while (iterator.hasNext()) {
            KeyValue<String, Tuple<List<ClickEvent>, List<StockTransaction>>> keyValue = iterator.next();
                 if (keyValue.value != null) {
                     if (!keyValue.value.getX().isEmpty()) {
-                        logger.info("TX list: " + keyValue.value.getX());
+                        logger.debug("Click Event list: " + keyValue.value.getX());
                     }
                     if (!keyValue.value.getY().isEmpty()) {
-                        logger.info("Click Event list: " + keyValue.value.getY());
+                        logger.debug("Transaction list: " + keyValue.value.getY());
                     }
 
                 } else {
-                    logger.info("value is NULL ????");
+                    logger.error("value is NULL");
                 }
                if (keyValue.value != null &&
                        (!keyValue.value.getX().isEmpty() || !keyValue.value.getY().isEmpty())) {
-                   logger.info(">>>>>>>>>>> update store ");
-
                    List<ClickEvent> clickEventList = new ArrayList<>(keyValue.value.getX());
                    List<StockTransaction> stockTransactionList = new ArrayList<>(keyValue.value.getY());
                    context.forward(keyValue.key, new Tuple<>(clickEventList, stockTransactionList));
