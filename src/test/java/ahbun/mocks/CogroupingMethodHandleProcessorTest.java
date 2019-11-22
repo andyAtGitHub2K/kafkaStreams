@@ -9,10 +9,9 @@ import org.apache.kafka.streams.processor.Punctuator;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,6 +25,8 @@ public class CogroupingMethodHandleProcessorTest {
     private CogroupProcessor processor = new CogroupProcessor(stateStoreName, Duration.ofMillis(5000));
     private MockKeyValueStore<String, Tuple<List<ClickEvent>, List<StockTransaction>>> mockKVStore =
             new MockKeyValueStore<>();
+    private ZoneId ZONE_ID = ZoneId.of("America/Los_Angeles");
+
     @Test
     public void testInit() {
         processor.init(processorContext);
@@ -39,7 +40,8 @@ public class CogroupingMethodHandleProcessorTest {
     public void testProcess() {
         ClickEvent clickEventToProcess = new ClickEvent("A", Instant.ofEpochSecond(500), "link A");
         LocalDateTime date = LocalDateTime.of(2019,11,10,10,20);
-        StockTransaction stockTransactionToProcess = getTransaction(date);
+        Date localDate = new Date(date.toInstant(ZONE_ID.getRules().getOffset(date)).toEpochMilli());
+        StockTransaction stockTransactionToProcess = getTransaction(localDate);
         List<ClickEvent> clickEventList = new ArrayList<>();
         List<StockTransaction> stockTransactionList = new ArrayList<>();
         clickEventList.add(clickEventToProcess);
@@ -63,7 +65,8 @@ public class CogroupingMethodHandleProcessorTest {
     public void testPunctuate() {
         ClickEvent clickEventToProcess = new ClickEvent("A", Instant.ofEpochSecond(500), "link A");
         LocalDateTime date = LocalDateTime.of(2019,11,10,10,20);
-        StockTransaction stockTransactionToProcess = getTransaction(date);
+        Date localDate = new Date(date.toInstant(ZONE_ID.getRules().getOffset(date)).toEpochMilli());
+        StockTransaction stockTransactionToProcess = getTransaction(localDate);
         List<ClickEvent> clickEventList = new ArrayList<>();
         List<StockTransaction> stockTransactionList = new ArrayList<>();
         clickEventList.add(clickEventToProcess);
@@ -86,7 +89,7 @@ public class CogroupingMethodHandleProcessorTest {
         Assert.assertEquals(0, tupleA.getY().size());
     }
 
-    private StockTransaction getTransaction(LocalDateTime localDateTime) {
+    private StockTransaction getTransaction(Date localDateTime) {
         StockTransaction.STransactionBuilder builder = StockTransaction.builder();
         builder.symbol("abc")
                 .transactionTimestamp(localDateTime)

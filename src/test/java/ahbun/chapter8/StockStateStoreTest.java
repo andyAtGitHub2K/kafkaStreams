@@ -55,11 +55,10 @@ public class StockStateStoreTest {
             testDriver = new TopologyTestDriver(StockTop5Topology.getTopology(appProperties, logger), streamProperties);
 
             transactionList = DataGenerator.makeStockTx(5, 3, INSUSTRY_LIST);
-            consumerRecordFactory =
-                    new ConsumerRecordFactory<>(stringSerde.serializer(), stockTransactionSerde.serializer());
-
             source = appProperties.getProperty("share.volume.topic");
             sink = appProperties.getProperty("topN.by.industry");
+            consumerRecordFactory =
+                    new ConsumerRecordFactory<>(stringSerde.serializer(), stockTransactionSerde.serializer());
         } catch (IOException ex) {
             Assert.assertTrue("setup failed: " + ex.getMessage(), false);
         }

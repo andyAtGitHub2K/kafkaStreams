@@ -6,6 +6,7 @@ import org.apache.kafka.streams.processor.TimestampExtractor;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.TimeZone;
 
 public class StockTxTimestampExtractor  implements TimestampExtractor {
@@ -16,11 +17,11 @@ public class StockTxTimestampExtractor  implements TimestampExtractor {
         }
 
         StockTransaction stockTransaction = (StockTransaction)record.value();
-        LocalDateTime time = stockTransaction.getTransactionTimestamp();
-        ZoneId zoneId = TimeZone.getDefault().toZoneId();
-
+        Date time = stockTransaction.getTransactionTimestamp();
+        //ZoneId zoneId = TimeZone.getDefault().toZoneId();
+        // toInstant(zoneId.getRules().getOffset(time)).toEpochMilli()
         return (time != null)
-                ? time.toInstant(zoneId.getRules().getOffset(time)).toEpochMilli()
+                ? time.getTime()
                 : record.timestamp();
     }
 }

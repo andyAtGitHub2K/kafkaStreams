@@ -1,6 +1,7 @@
 package ahbun.model;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 
 /***
@@ -15,8 +16,8 @@ public class StockTransaction {
     int shares;
     double sharePrice;
     String customerId;
-    LocalDateTime transactionTimestamp;
     boolean purchase;
+    Date transactionTimestamp;
 
     public static STransactionBuilder builder() { return new STransactionBuilder(); }
     public static STransactionBuilder builder(final StockTransaction st) {
@@ -67,7 +68,7 @@ public class StockTransaction {
         return customerId;
     }
 
-    public LocalDateTime getTransactionTimestamp() {
+    public Date getTransactionTimestamp() {
         return transactionTimestamp;
     }
 
@@ -116,7 +117,7 @@ public class StockTransaction {
         int shares;
         double sharePrice;
         String customerId;
-        LocalDateTime transactionTimestamp;
+        Date transactionTimestamp;
         boolean purchase;
 
         public StockTransaction build() { return new StockTransaction(this);}
@@ -158,7 +159,7 @@ public class StockTransaction {
             return this;
         }
 
-        public STransactionBuilder transactionTimestamp(LocalDateTime transactionTimestamp) {
+        public STransactionBuilder transactionTimestamp(Date transactionTimestamp) {
             this.transactionTimestamp = transactionTimestamp;
             return this;
         }

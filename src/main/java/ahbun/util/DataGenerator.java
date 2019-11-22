@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.time.temporal.TemporalUnit;
@@ -221,7 +222,8 @@ public class DataGenerator {
             industry = industryList[faker.number().numberBetween(0, industryList.length -1)];
             txList.add(builder.customerId(customerIDList.get(faker.number().numberBetween(0, customerSize - 1)))
                     .industry(industry)
-                    .transactionTimestamp(LocalDateTime.now())
+                    //.transactionTimestamp(LocalDateTime.now())
+                    .transactionTimestamp(new Date())
                     .sector(faker.company().name())
                     .purchase(faker.number().numberBetween(1,3) == 1)
                     .sharePrice(faker.number().randomDouble(2, 10, 200))
@@ -252,6 +254,8 @@ public class DataGenerator {
         String industry;
         String cid;
         LocalDateTime purchaseTime;
+        ZoneId zoneId = TimeZone.getDefault().toZoneId();
+        // toInstant(zoneId.getRules().getOffset(time)).toEpochMilli()
         for (int i = 0; i < txCount; i++) {
             // randomly pick simulated data
             industry = industryList[faker.number().numberBetween(0, industryList.length - 1)];
@@ -261,9 +265,13 @@ public class DataGenerator {
             } else {
                 purchaseTime = localDateTimeStart.plusSeconds(faker.number().numberBetween(0, tradingWindowInSeconds));
             }
+
+            long epochMilli = purchaseTime.toInstant(zoneId.getRules().getOffset(purchaseTime)).toEpochMilli();
+            Date date = new Date(epochMilli);
             txList.add(builder.customerId(cid)
                     .industry(industry)
-                    .transactionTimestamp(purchaseTime)
+                    //.transactionTimestamp(purchaseTime)
+                    .transactionTimestamp(date)
                     .sector(faker.company().name())
                     .purchase(faker.number().numberBetween(1, 3) == 1)
                     .sharePrice(faker.number().randomDouble(2, 10, 200))
@@ -303,6 +311,8 @@ public class DataGenerator {
         int windowSizeInSec;
         int txCount;
         LocalDateTime endTime;
+        Date endDate;
+        ZoneId zoneId = TimeZone.getDefault().toZoneId();
         for(int i = 0; i < iteration; i++) {
             txCount = faker.number().numberBetween(minTxPerWindow, maxTxPerWindow);
             windowSizeInSec = windowSizeInSeconds[faker.number().numberBetween(0, windowSizeInSeconds.length - 1)];
@@ -312,16 +322,26 @@ public class DataGenerator {
                             ", gap: " + gapInSecond);
             List<StockTransaction> newTx = makeStockTxInTradingWindow(
                     txCount, customersId, industries,localDateTime, windowSizeInSec);
-            endTime = newTx.get(0).getTransactionTimestamp();
+            //endTime = newTx.get(0).getTransactionTimestamp();
+            endDate = newTx.get(0).getTransactionTimestamp();
 
             for (StockTransaction tx: newTx) {
-                if (tx.getTransactionTimestamp().isAfter(endTime)) {
+                /*if (tx.getTransactionTimestamp().isAfter(endTime)) {
                     endTime = tx.getTransactionTimestamp();
+                }*/
+
+                if (tx.getTransactionTimestamp().after(endDate)) {
+                    endDate = tx.getTransactionTimestamp();
                 }
+
             }
             stockTransactions.addAll(newTx);
             //endTime = stockTransactions.get(stockTransactions.size() - 1).getTransactionTimestamp();
-            localDateTime =  endTime.plusSeconds(gapInSecond);
+            //**localDateTime =  endTime.plusSeconds(gapInSecond);
+            //Date newLocalDate = new Date((endDate.toInstant().getEpochSecond() + gapInSecond) * 1000);
+
+            localDateTime = LocalDateTime.ofEpochSecond(endDate.toInstant().getEpochSecond() + gapInSecond,
+                    0, zoneId.getRules().getOffset(endDate.toInstant().plus(gapInSecond, ChronoUnit.SECONDS)));
         }
         
         return stockTransactions;

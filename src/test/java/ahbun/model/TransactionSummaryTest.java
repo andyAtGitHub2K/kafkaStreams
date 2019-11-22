@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -13,7 +15,7 @@ public class TransactionSummaryTest {
     private TransactionSummary.TransactionSummaryBuilder builder;
     private StockTransaction.STransactionBuilder txBuilder;
     private StockTransaction transaction;
-
+    private ZoneId ZONE_ID = ZoneId.of("America/Los_Angeles");
     private String symbol;
     private int quantity;
     private LocalDateTime localDateTime;
@@ -28,12 +30,13 @@ public class TransactionSummaryTest {
         price = 200.0;
         symbol = "HIJ";
         purchaseTS = LocalDateTime.now();
+        Date localDate = new Date(purchaseTS.toInstant(ZONE_ID.getRules().getOffset(purchaseTS)).toEpochMilli());
         key = cid + "-" + symbol;
 
         // initialize transaction
         txBuilder = StockTransaction.builder();
         txBuilder.symbol(symbol)
-                .transactionTimestamp(purchaseTS)
+                .transactionTimestamp(localDate)
                 .shares(quantity)
                 .sharePrice(price)
                 .sector("manufacturing")

@@ -37,11 +37,24 @@ dependencies {
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version:'5.0.0'
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version:'5.0.0'
     testCompile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.29'
-    testCompile group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.3.0'
+    testCompile (group: 'org.apache.kafka', name: 'kafka_2.11', version: '2.3.0', classifier: 'test') {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
+
+    testCompile (group: 'org.apache.kafka', name: 'kafka-streams-test-utils', version: '2.3.0') {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
     testCompile group: 'org.apache.kafka', name: 'kafka-clients', version: '2.3.0', classifier: 'test'
     testCompile group: 'org.apache.kafka', name: 'kafka-streams', version: '2.3.0', classifier: 'test'
     testCompile group:'org.mockito', name:'mockito-core', version:'3.1.0'
     testCompile group:'org.hamcrest', name:'hamcrest-junit', version:'2.0.0.0'
+    testCompile group: 'org.scala-lang', name: 'scala-library-all', version: '2.11.12', ext: 'pom'
+    // chapter 9 H2 Database Engine and Kafka Connect
+    implementation files('libs/h2-1.4.200.jar', 'libs/kafka-connect-jdbc-5.3.0.jar')
+    // Web Server for Interactive query
+    compile (group: 'com.sparkjava', name:'spark-core', version:'2.9.1') {
+        exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    }
 }
 
 task runChap2Producer(type: JavaExec) {
@@ -62,4 +75,22 @@ task runChap3SmallAllCapApp(type: JavaExec) {
 task runChap3Zmart(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
     main = "ahbun.chap3.zeemart.ZMartKSApp"
+}
+
+// chapter 9 H2 DB Engine
+task runDBServer(type: JavaExec){
+    classpath sourceSets.main.runtimeClasspath
+    main = "ahbun.chapter9.kafkaConnect.H2DbServer"
+}
+
+// chapter 9 insert StockTransactions to H2 DB
+task runDBInsertClient(type: JavaExec){
+    classpath sourceSets.main.runtimeClasspath
+    main = "ahbun.chapter9.kafkaConnect.H2DbClient"
+}
+
+// chapter 9 insert StockTransactions to H2 DB
+task runKafkaDBImport(type: JavaExec){
+    classpath sourceSets.main.runtimeClasspath
+    main = "ahbun.chapter9.kafkaConnect.KafkaImportNewRecordsFromDB"
 }
